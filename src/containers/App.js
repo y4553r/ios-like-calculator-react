@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useReducer } from 'react';
 
 import { NUMBERS, OPERATORS, OTHERS } from '../constants';
 import * as AppStyles from './AppStyles';
@@ -6,57 +6,48 @@ import ButtonNumber from '../components/ButtonNumber';
 import ButtonOperator from '../components/ButtonOperator';
 import ButtonOther from '../components/ButtonOther';
 
+const initialState = {
+  display: '0'
+};
+const reducer = (state, action) => {
+  switch (action.type) {
+    case 'DISPLAY':
+      return { ...state, 
+        display: state.display === "0" ? action.payload :  state.display + action.payload
+      }
+    case 'CLEAR_ALL': return { ...state, display: '0' };
+    case 'CHANGE_SIGN': return { ...state, display: -1 * Number(state.display) + "" };
+    case 'PERCENTAGE': return { ...state, display: Number(state.display) / 100 + "" };
+    default:
+      return state;
+  }
+};
+
 function App() {
-  const [display, setDisplay] = useState("0");
-  const [result, setResult] = useState(0);
-  const [activeOperator, setActiveOperator] = useState("");
+  const [state, dispatch] = useReducer(reducer, initialState);
+  const { display, result, operatorClicked } = state;
 
   const onClickNumber = number => {
-    if (display === "0")
-      setDisplay(number);
-    else
-      setDisplay(display + number)
+    dispatch({ type: 'DISPLAY', payload: number });
   }
 
   const onClickOther = other => {
-    switch (other) {
-      case "AC":
-        setDisplay("0");
+    switch(other) {
+      case "AC": 
+        dispatch({ type: 'CLEAR_ALL' });
         break;
-      case "+/-":
-        if (display[0] === "-")
-          setDisplay(display.slice(1));
-        else
-          setDisplay("-" + display);
+      case "+/-": 
+        dispatch({ type: 'CHANGE_SIGN' });
         break;
-      case "%":
-        setDisplay(Number(display) / 100);
+      case "%": 
+        dispatch({ type: 'PERCENTAGE' });
         break;
       default: return;
     }
   }
 
   const onClickOperator = operator => {
-    switch (operator) {
-      case "÷":
-        setResult(Number(result) / Number(display));
-        break;
-      case "x":
-        setResult(Number(result) * Number(display));
-        break;
-      case "-":
-        setResult(Number(result) - Number(display));
-        break;
-      case "+":
-        setResult(Number(result) + Number(display));
-        break;
-      case "=":
-        setDisplay(Number(result));
-        break;
-      default:
-        return;
-    }
-    setActiveOperator(operator);
+    
   }
 
   const renderNumbers = NUMBERS.map(number => {
