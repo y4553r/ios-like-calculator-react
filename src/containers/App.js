@@ -1,109 +1,89 @@
-import React from 'react';
-import styled from 'styled-components';
+import React, { useState } from 'react';
 
-const BUTTONS = [
-  { label: "AC", type: "none" },
-  { label: "+/-", type: "none" },
-  { label: "%", type: "none" },
-  { label: "÷", type: "operator" },
-  { label: "7", type: "number" },
-  { label: "8", type: "number" },
-  { label: "9", type: "number" },
-  { label: "x", type: "operator" },
-  { label: "4", type: "number" },
-  { label: "5", type: "number" },
-  { label: "6", type: "number" },
-  { label: "-", type: "operator" },
-  { label: "1", type: "number" },
-  { label: "2", type: "number" },
-  { label: "3", type: "number" },
-  { label: "+", type: "operator" },
-  { label: "0", type: "number" },
-  { label: ".", type: "number" },
-  { label: "=", type: "number" },
-];
+import { NUMBERS, OPERATORS, OTHERS } from '../constants';
+import * as AppStyles from './AppStyles';
+import ButtonNumber from '../components/ButtonNumber';
+import ButtonOperator from '../components/ButtonOperator';
+import ButtonOther from '../components/ButtonOther';
 
 function App() {
+  const [display, setDisplay] = useState("0");
+  const [result, setResult] = useState(0);
+  const [activeOperator, setActiveOperator] = useState("");
+
+  const onClickNumber = number => {
+    if (display === "0")
+      setDisplay(number);
+    else
+      setDisplay(display + number)
+  }
+
+  const onClickOther = other => {
+    switch (other) {
+      case "AC":
+        setDisplay("0");
+        break;
+      case "+/-":
+        if (display[0] === "-")
+          setDisplay(display.slice(1));
+        else
+          setDisplay("-" + display);
+        break;
+      case "%":
+        setDisplay(Number(display) / 100);
+        break;
+      default: return;
+    }
+  }
+
+  const onClickOperator = operator => {
+    switch (operator) {
+      case "÷":
+        setResult(Number(result) / Number(display));
+        break;
+      case "x":
+        setResult(Number(result) * Number(display));
+        break;
+      case "-":
+        setResult(Number(result) - Number(display));
+        break;
+      case "+":
+        setResult(Number(result) + Number(display));
+        break;
+      case "=":
+        setDisplay(Number(result));
+        break;
+      default:
+        return;
+    }
+    setActiveOperator(operator);
+  }
+
+  const renderNumbers = NUMBERS.map(number => {
+    return <ButtonNumber key={number} onClick={() => onClickNumber(number)} data-testid="calculator-button">{number}</ButtonNumber>
+  });
+  const renderOperators = OPERATORS.map(operator => {
+    return <ButtonOperator key={operator} onClick={() => onClickOperator(operator)} data-testid="calculator-button">{operator}</ButtonOperator>
+  });
+  const renderOthers = OTHERS.map(other => {
+    return <ButtonOther key={other} onClick={() => onClickOther(other)} data-testid="calculator-button">{other}</ButtonOther>
+  });
+
   return (
-    <Root>
-      <Title>iOS Calculator</Title>
-      <Calculator data-testid="calculator-container">
-        <CalculationsArea>
-          <Calculations>0</Calculations>
-        </CalculationsArea>
-        <Grid>
-          {BUTTONS.map(button => {
-            if(button.label === "0")
-              return <Button_0 key={button.label} type={button.type} label={button.label} data-testid="calculator-button">{button.label}</Button_0>
-            return <Button key={button.label} type={button.type} label={button.label} data-testid="calculator-button">{button.label}</Button>
-          })}
-        </Grid>
-      </Calculator>
-    </Root>
+    <AppStyles.Root>
+      <AppStyles.Title>iOS Calculator</AppStyles.Title>
+      <AppStyles.Calculator data-testid="calculator-container">
+        <AppStyles.CalculationsArea>
+          <AppStyles.Calculations>{display}</AppStyles.Calculations>
+        </AppStyles.CalculationsArea>
+        <AppStyles.Grid>
+          {renderNumbers}
+          {renderOperators}
+          {renderOthers}
+        </AppStyles.Grid>
+      </AppStyles.Calculator>
+    </AppStyles.Root>
   );
 }
-
-const Root = styled.div`
-  height: 100vh;
-  background-color: black;
-  text-align: center;
-  position: relative;
-`;
-const Title = styled.h1`
-  color: white;
-  font-size: 5rem;
-  font-family: 'Source Sans Pro', sans-serif;
-  margin: 0;
-  font-weight: 300;
-  padding: 2rem;
-`;
-const Calculator = styled.div`
-  width: 25%;
-  margin: auto;
-  height: 100%;
-`;
-const Grid = styled.div`
-  margin-top: 30px;
-  display: grid;
-  grid-template: 
-    ". . . ." auto
-    ". . . ." auto
-    ". . . ." auto
-    ". . . ." auto
-    "zero zero . ." auto;
-  grid-row-gap: 10px;
-  grid-column-gap: 10px;
-`;
-const Button = styled.button`
-  border-radius: 100px;
-  border: none;
-  outline: none;
-  cursor: pointer;
-  background-color: ${props => props.type === "number" ? "#333" : props.type === "operator" ? "orange" : "#AAA"};
-  color: ${props => props.type === "number" || props.type === "operator" ? "white" : "black"};
-  width: ${props => props.label === "0" ? "110px" : "50px"};
-  height: 50px;
-  font-size: 1.5rem;
-  font-family: 'Source Sans Pro', sans-serif;
-  &:hover {
-    
-  }
-`;
-const Button_0 = styled(Button)`
-  grid-area: zero;
-`;
-const CalculationsArea = styled.div`
-  height: 50px;
-`;
-const Calculations = styled.p`
-  color: white;
-  font-size: 3.5rem;
-  font-family: 'Source Sans Pro', sans-serif;
-  margin: 0;
-  font-weight: 300;
-  text-align: right;
-  padding-right: 1rem;
-  padding-bottom: 20px;
-`;
 
 export default App;
