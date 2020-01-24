@@ -1,45 +1,41 @@
 import React, { useReducer } from 'react';
 
 import { NUMBERS, OPERATORS, OTHERS } from '../constants';
-import * as AppStyles from './AppStyles';
+import { reducer } from '../reducer';
+
 import ButtonNumber from '../components/ButtonNumber';
 import ButtonOperator from '../components/ButtonOperator';
 import ButtonOther from '../components/ButtonOther';
 
+import * as AppStyles from './AppStyles';
+
+/**
+ * @todo: add button effects
+ */
 const initialState = {
-  display: '0'
-};
-const reducer = (state, action) => {
-  switch (action.type) {
-    case 'DISPLAY':
-      return { ...state, 
-        display: state.display === "0" ? action.payload :  state.display + action.payload
-      }
-    case 'CLEAR_ALL': return { ...state, display: '0' };
-    case 'CHANGE_SIGN': return { ...state, display: -1 * Number(state.display) + "" };
-    case 'PERCENTAGE': return { ...state, display: Number(state.display) / 100 + "" };
-    default:
-      return state;
-  }
+  display: '0',
+  resultHistory: [],
+  operatorClicked: false,
+  previousValue: 0,
 };
 
 function App() {
   const [state, dispatch] = useReducer(reducer, initialState);
-  const { display, result, operatorClicked } = state;
+  const { display, operatorClicked } = state;
 
   const onClickNumber = number => {
     dispatch({ type: 'DISPLAY', payload: number });
   }
 
   const onClickOther = other => {
-    switch(other) {
-      case "AC": 
+    switch (other) {
+      case "AC":
         dispatch({ type: 'CLEAR_ALL' });
         break;
-      case "+/-": 
+      case "+/-":
         dispatch({ type: 'CHANGE_SIGN' });
         break;
-      case "%": 
+      case "%":
         dispatch({ type: 'PERCENTAGE' });
         break;
       default: return;
@@ -47,7 +43,29 @@ function App() {
   }
 
   const onClickOperator = operator => {
-    
+    switch (operator) {
+      case "=":
+        dispatch({ type: 'EQUAL' });
+        break;
+      case "+":
+        if (!operatorClicked)
+          dispatch({ type: 'ADD' });
+        break;
+      case "-":
+        if (!operatorClicked)
+          dispatch({ type: 'SUBSTRACT' });
+        break;
+      case "x":
+        if (!operatorClicked)
+          dispatch({ type: 'MULTIPLY' });
+        break;
+      case "÷":
+        if (!operatorClicked)
+          dispatch({ type: 'DIVIDE' });
+        break;
+      default:
+        return;
+    }
   }
 
   const renderNumbers = NUMBERS.map(number => {
