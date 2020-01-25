@@ -13,6 +13,7 @@ export const Title = styled.h1`
   margin: 0;
   font-weight: 300;
   padding: 2rem;
+  user-select: none;
 `;
 export const Calculator = styled.div`
   width: 240px;
@@ -40,9 +41,9 @@ export const Button = styled.button`
   font-size: 1.5rem;
   font-family: 'Karla', sans-serif;
   font-weight: 400;
-  &:active {
-    opacity: 0.5;
-  }
+  // &:active {
+  //   opacity: 0.5;
+  // }
 `;
 export const CalculationsArea = styled.div`
   height: 50px;
